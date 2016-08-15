@@ -13,16 +13,21 @@ end
 
 local function mqtt_start()  
     m = mqtt.Client(config.ID, 120)
+    gpio.mode(1, gpio.OUTPUT)
+    gpio.mode(2, gpio.OUTPUT)
+    gpio.mode(3, gpio.OUTPUT)
+    gpio.mode(4, gpio.OUTPUT)
     -- register message callback beforehand
     m:on("message", function(conn, topic, data) 
-      if data ~= nil then
-        print(topic .. ": " .. data)
-        if data == "ligar" then
-            gpio.write(0, gpio.LOW)
-        else
-            gpio.write(0, gpio.HIGH)
+        if data ~= nil then
+            print(topic .. ": " .. data)
+            pin = string.gsub(topic, "led/", "")   --exemplo: led/3 -> 3
+            if data == "ligar" then
+                gpio.write(pin, gpio.HIGH)
+            else
+                gpio.write(pin, gpio.LOW)
+            end
         end
-      end
     end)
     -- Connect to broker
     m:connect(config.HOST, config.PORT, 0, 1, function(con) 
